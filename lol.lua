@@ -2525,8 +2525,7 @@ function UILib:AddToggle(tabName, text, default, callback)
 	toggle.Element:SetAttribute("state", default)
 	toggle.Element.Fill.Visible = default
 	toggle.Element.Knob.Position = default and UDim2.new(1, -39, 0.5, 0) or UDim2.new(1, -55, 0.5, 0)
-
-	toggle.Element.MouseButton1Click:Connect(function()
+        toggle.Element.MouseButton1Click:Connect(function()
 		local current = toggle.Element:GetAttribute("state")
 		local newState = not current
 		toggle.Element:SetAttribute("state", newState)
