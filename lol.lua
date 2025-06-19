@@ -2454,3 +2454,93 @@ local script = G2L["b3"];
 	
 		if success and content then
 			-- Se
+local UILib = {}
+local Tabs = {}
+local TabContent = {}
+local TabTemplate = G2L["18"]
+local ButtonTemplate = G2L["2b"]
+local ToggleTemplate = G2L["32"]
+local SectionTemplate = G2L["30"]
+
+local TabHolder = G2L["17"]
+local Container = G2L["28"]
+local ScrollHolder = G2L["2a"]
+
+function UILib:CreateTab(name, icon)
+	local newTab = TabTemplate:Clone()
+	newTab.Name = name
+	newTab.Visible = true
+	newTab.TextLabel.Text = name
+	newTab.Parent = TabHolder
+	for _, iconObj in pairs(newTab.icons:GetChildren()) do
+		iconObj.Visible = iconObj.Name == icon
+	end
+	local newContent = ScrollHolder:Clone()
+	newContent.Visible = false
+	newContent.Name = name
+	newContent.Parent = Container
+	TabContent[name] = newContent
+	Tabs[name] = newTab
+
+	newTab.MouseButton1Click:Connect(function()
+		for _, frame in pairs(Container:GetChildren()) do
+			if frame:IsA("ScrollingFrame") then
+				frame.Visible = false
+			end
+		end
+		for _, btn in pairs(TabHolder:GetChildren()) do
+			if btn:IsA("TextButton") then
+				btn.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
+			end
+		end
+		newContent.Visible = true
+		newTab.BackgroundColor3 = Color3.fromRGB(209, 0, 4)
+	end)
+	if #Container:GetChildren() == 1 then
+		newTab:Activate()
+		newContent.Visible = true
+	end
+end
+
+function UILib:AddSection(tabName, text)
+	local section = SectionTemplate:Clone()
+	section.Visible = true
+	section.Text = text
+	section.Parent = TabContent[tabName]
+end
+
+function UILib:AddButton(tabName, text, callback)
+	local button = ButtonTemplate:Clone()
+	button.Visible = true
+	button.Text = "  " .. text
+	button.Parent = TabContent[tabName]
+	button.MouseButton1Click:Connect(callback)
+end
+
+function UILib:AddToggle(tabName, text, default, callback)
+	local toggle = ToggleTemplate:Clone()
+	toggle.Visible = true
+	toggle.Text = "  " .. text
+	toggle.Parent = TabContent[tabName]
+	toggle.Element:SetAttribute("state", default)
+	toggle.Element.Fill.Visible = default
+	toggle.Element.Knob.Position = default and UDim2.new(1, -39, 0.5, 0) or UDim2.new(1, -55, 0.5, 0)
+
+	toggle.Element.MouseButton1Click:Connect(function()
+		local current = toggle.Element:GetAttribute("state")
+		local newState = not current
+		toggle.Element:SetAttribute("state", newState)
+		toggle.Element.Fill.Visible = newState
+		toggle.Element.Knob.Position = newState and UDim2.new(1, -39, 0.5, 0) or UDim2.new(1, -55, 0.5, 0)
+		callback(newState)
+	end)
+end
+
+return UILib
+
+local lib = UILib
+
+lib:CreateTab("Main", "home_on")
+lib:AddSection("Main", "Main Features")
+lib:AddButton("Main", "Click me", function() print("Clicked") end)
+lib:AddToggle("Main", "Auto Mode", false, function(state) print("Toggled", state) end)
